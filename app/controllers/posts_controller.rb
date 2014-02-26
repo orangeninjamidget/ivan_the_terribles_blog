@@ -1,10 +1,13 @@
 class PostsController < ApplicationController
-  caches_page :index
+  caches_page :index, :show
+  before_filter(only: [:index, :show]) { @page_caching = true }
+  before_filter :set_post, only: [:show, :edit, :update, :destroy]
+  cache_sweeper :post_sweeper
 
   # GET /posts
   # GET /posts.json
   def index
-    @posts = Post.order("id").includes(:comments => :replies)
+    @posts = Post.all
 
     respond_to do |format|
       format.html # index.html.erb
@@ -15,8 +18,6 @@ class PostsController < ApplicationController
   # GET /posts/1
   # GET /posts/1.json
   def show
-    @post = Post.find(params[:id])
-
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @post }
@@ -36,14 +37,11 @@ class PostsController < ApplicationController
 
   # GET /posts/1/edit
   def edit
-    @post = Post.find(params[:id])
   end
 
   # POST /posts
   # POST /posts.json
   def create
-    @post = Post.new(params[:post])
-
     respond_to do |format|
       if @post.save
         format.html { redirect_to @post, notice: 'Post was successfully created.' }
@@ -58,8 +56,6 @@ class PostsController < ApplicationController
   # PUT /posts/1
   # PUT /posts/1.json
   def update
-    @post = Post.find(params[:id])
-
     respond_to do |format|
       if @post.update_attributes(params[:post])
         format.html { redirect_to @post, notice: 'Post was successfully updated.' }
@@ -74,7 +70,6 @@ class PostsController < ApplicationController
   # DELETE /posts/1
   # DELETE /posts/1.json
   def destroy
-    @post = Post.find(params[:id])
     @post.destroy
 
     respond_to do |format|
@@ -82,4 +77,9 @@ class PostsController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+  private
+    def set_post
+      @post = Post.find(params[:id])
+    end
 end
