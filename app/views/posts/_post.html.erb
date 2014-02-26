@@ -3,4 +3,5 @@
   <div class="post"><%= post.body %></div>
   <%= render 'post_nav', post: post %>
   <%= post.comments.size if post.comments.size > 0 %> Comments
+  <%= render post.comments %>
 </section>
